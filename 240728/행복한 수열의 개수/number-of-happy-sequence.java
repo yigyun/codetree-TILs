@@ -22,21 +22,18 @@ public class Main {
             int col = 0; int row = 0;
             int count1 = 0; int count2 = 0;
             boolean check1 = false; boolean check2 = false;
-            for(int j = 0; j < n; j++){
-                if(matrix[i][j] != row){
+            for(int j = 0; j < n; j++){    
+                if (matrix[i][j] != row){
                     count1 = 1;
                     row = matrix[i][j];
-                } else {
-                    count1++;
-                    if(count1 >= m) check1 = true;
-                }
+                } else count1++;
+                if(count1 >= m) check1 = true;
+
                 if(matrix[j][i] != col){
                     count2 = 1;
                     col = matrix[j][i];
-                } else {
-                    count2++;
-                    if(count2 >= m) check2 = true;
-                }
+                } else count2++;
+                if(count2 >= m) check2 = true;
             }
             if(check1) count++;
             if(check2) count++;
