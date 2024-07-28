@@ -54,6 +54,8 @@ public class Main {
             for(int j = 0; j < m-1; j++){
                 max = Math.max(max, matrix[i][j] + matrix[i][j+1] + matrix[i+1][j]);
                 max = Math.max(max, matrix[i][j] + matrix[i+1][j] + matrix[i+1][j+1]);
+                max = Math.max(max, matrix[i][j] + matrix[i][j+1] + matrix[i+1][j+1]);
+                max = Math.max(max, matrix[i][j+1] + matrix[i+1][j] + matrix[i+1][j+1]);
             }
         }
         return max;
