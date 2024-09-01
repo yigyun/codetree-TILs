@@ -107,7 +107,7 @@ public class Main {
 
     public static void rotateSub(int x, int y, int r){
 
-        for(int rotation = 0; rotation <= r; rotation++){
+        for(int rotation = 0; rotation < r; rotation++){
             int[][] newMatrix = new int[3][3];
             for(int i = 0; i < 3; i++){
                 for(int j = 0; j < 3; j++){
