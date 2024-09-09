@@ -25,8 +25,6 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
         // 체스판
         static int[][] matrix;
         static boolean[][] visited;
-        static int[][] knight;
-
         // L 체스판의 크기, N 기사의 수, Q 명령의 수 k 기사의 체력
         static int L; static int N; static int Q;
 
@@ -44,7 +42,6 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             StringTokenizer st = new StringTokenizer(br.readLine());
             L = Integer.parseInt(st.nextToken()); N = Integer.parseInt(st.nextToken()); Q = Integer.parseInt(st.nextToken());
-            int[] knights = new int[L+1];
             int result = 0;
                         // 체스판 기입
             matrix = new int[L][L];
@@ -55,6 +52,7 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
                 }
             }
             // 기사
+            int[] knights = new int[N+1];
             Map<Integer, Knight> knMap = new HashMap<>(); 
             for(int i = 1; i <= N; i++){
                 st = new StringTokenizer(br.readLine());
@@ -81,7 +79,7 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
                     Knight temp = que.poll();
                     int nx = temp.x + dx[dir];
                     int ny = temp.y + dy[dir];
-                    if(isRange(nx, ny, temp.w, temp.h) && wall(nx, ny, temp.h, temp.w)){
+                    if(isRange(nx, ny, temp.h, temp.w) && wall(nx, ny, temp.h, temp.w)){
                         for(int num : knMap.keySet()){
                             Knight kn = knMap.get(num);
                             if(kn.k > 0 && temp.number != num && intersect(kn, nx, ny, temp.h, temp.w)){
@@ -104,7 +102,7 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
                     if(temp.number != knum){
                         for(int x = nx; x < nx + temp.h; x++){
                             for(int y = ny; y < ny + temp.w; y++){
-                                if(matrix[x][y] == 1){
+                                if(!(x < 0 || x >= L || y < 0 || y >= L) && matrix[x][y] == 1){
                                     damage++;
                                 }
                             }
@@ -126,8 +124,7 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
         }
 
         static boolean isRange(int nx, int ny, int h, int w){
-            return !(nx < 0 || nx >= L || ny < 0 || ny >= L
-            || (nx + h - 1) < 0 || (nx + h - 1) >= L || (ny + w - 1) < 0 || (ny + w - 1) >= L);
+            return !(nx < 0 || nx >= L || ny < 0 || ny >= L || (nx + h - 1) < 0 || (nx + h - 1) >= L || (ny + w - 1) < 0 || (ny + w - 1) >= L);
         }
 
         static boolean intersect(Knight kn, int nx, int ny, int h, int w){
@@ -137,7 +134,7 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
         static boolean wall(int nx, int ny, int h, int w){
             for(int i = nx; i < nx + h; i++){
                 for(int j = ny; j < ny + w; j++){
-                    if(!(i < 0 || i >= L || j < 0 || j >= L) && matrix[i][j] == 2){
+                    if((i < 0 || i >= L || j < 0 || j >= L) || matrix[i][j] == 2){
                         return false;
                     }
                 }
