@@ -137,7 +137,7 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
         static boolean wall(int nx, int ny, int h, int w){
             for(int i = nx; i < nx + h; i++){
                 for(int j = ny; j < ny + w; j++){
-                    if(matrix[i][j] == 2){
+                    if(!(i < 0 || i >= L || j < 0 || j >= L) && matrix[i][j] == 2){
                         return false;
                     }
                 }
