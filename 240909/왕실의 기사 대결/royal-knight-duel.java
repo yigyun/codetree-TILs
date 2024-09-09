@@ -72,9 +72,11 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
 
                 Queue<Knight> que = new LinkedList<>();
                 Stack<Knight> stack = new Stack<>();
+                Set<Integer> set = new HashSet<>();
                 // 벽은 2임 벽 통과 가능한지 찾으면서 가기.
                 que.offer(knMap.get(knum));
                 stack.push(knMap.get(knum));
+                set.add(knum);
                 while(!que.isEmpty()){
                     Knight temp = que.poll();
                     int nx = temp.x + dx[dir];
@@ -82,9 +84,10 @@ r,c를 기준으로 이게 좌측 상단으로 h x w 크기의 직사각형을 �
                     if(isRange(nx, ny, temp.h, temp.w) && wall(nx, ny, temp.h, temp.w)){
                         for(int num : knMap.keySet()){
                             Knight kn = knMap.get(num);
-                            if(kn.k > 0 && temp.number != num && intersect(kn, nx, ny, temp.h, temp.w)){
+                            if(!set.contains(num) && kn.k > 0 && temp.number != kn.number && intersect(kn, nx, ny, temp.h, temp.w)){
                                 que.offer(kn);
                                 stack.push(kn);
+                                set.add(kn.number);
                             }
                         }
                     } else {
