@@ -1,229 +1,242 @@
 import java.util.*;
 import java.io.*;
 
-/**
-- 기본 조건 -
-미로는 N x N
-좌상단 1,1 기준임.
-빈칸(참가자 이동 가능)
-벽(이동 불가 1~9의 내구도, 회전하면 내구도 1 감소, 0이 되면 빈칸이 됨)
-출구에 도착하면 즉시 탈출
-
-1. 이동
-1초마다 모든 참가자가 한 칸씩 움직인다.
-출구까지의 최단거리 |x1 - x2| + |y1 - y2|
-동시에 움직인다고 생각해야 한다.
-상하좌우로 움직임 가능, 4방향
-움직이면 그 칸은 출구까지의 거리에 가까워야 한다.
-움직일 수 있다면 상,하가 우선된다.
-한 칸에 여러명이 가능하다.
-
-2. 회전
-한명 이상의 참가자 + 출구를 포함하는 가장 작은 정사각형을 잡는다.
-r 좌표가 작은것 먼저, 그 중에서는 c좌표가 작은 것 우선
-사각형 찾고 90도 회전 + 벽 내구도 1 감소(해당 범위)
-
-
-구할 것 참가자 이동 거리 합 + 출구 좌표
-
-순서
-이동 -> 회전
-
-**/
-
 public class Main {
-    
-    // 미로, 출구 좌표, 상하좌우
-    static int[][] miro;
-    static int gx;
-    static int gy;
-    static int[] dx = new int[]{-1, 1, 0, 0};
-    static int[] dy = new int[]{0, 0, -1, 1};
-    // N 미로의 크기, M 참가자의 수, K 게임 턴
-    static int N;
-    static int M;
-    static int K;
-    // 살아있는 참가자 유지, 전체 참가자 명단 alive 1이면 살아있는 거임.
-    static int[] alive;
-    static class Person{
-        int x; int y;
-        Person(int x, int y){
+
+    /*
+    N x N 크기 미로는 빈칸, 벽, 출구로 나뉨.
+    벽은 내구도를 갖는다.
+    내구도가 0이되면 빈칸으로 변경한다.
+    1초마다 모든 참가자가 이동, 동시에 이동한다.
+    상하가 우선시 된다.
+    움직일 수 없으면 패스, 한 칸에 두 명이상의 참가자 가능 겹치기 가능 ㅇㅇ
+    1번은 이동, 그 다음 한명 이상의 참가자와 출구를 포함하는 가장 작은 정사각형 잡기.
+    r이 작은거 우선, c가 작은 거 우선. 시계방향 90도 중요!!
+    */
+
+     static class Person{
+        int x, y;
+        public Person(int x, int y){
             this.x = x;
             this.y = y;
         }
     }
-    static Map<Integer, Person> peoples;
-    // 거리길이
-    static int result;
 
-    public static void main(String[] args) throws IOException {
-        // N, M, K입력
-        StringBuilder sb = new StringBuilder();        
+    // 상하좌우
+    static int[] dx = new int[]{-1, 1, 0, 0};
+    static int[] dy = new int[]{0, 0, -1, 1};
+
+    static int n, m, k;
+    static int[][] miro = new int[10][10];
+
+    // 사람 데이터 정리하기.
+    static Person[] personList = new Person[11];
+    static int[] distance = new int[11]; // 최종 값 구하기 용
+    static int[] alive = new int[11]; // alive 1이면 출구 통과한 애임.
+
+    // 출구 좌표 관리하기.
+    static int ex;
+    static int ey;
+
+    public static void main(String[] args)throws IOException{
+        // 여기에 코드를 작성해주세요.
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken()); M = Integer.parseInt(st.nextToken()); K = Integer.parseInt(st.nextToken());
+        n = Integer.parseInt(st.nextToken()); m = Integer.parseInt(st.nextToken()); k = Integer.parseInt(st.nextToken());
         // 미로 입력
-        miro = new int[N][N];
-        for(int i = 0; i < N; i++){
+        for(int i = 0; i < n; i++){
             st = new StringTokenizer(br.readLine());
-            for(int j = 0; j < N; j++){
+            for(int j = 0; j < n; j++){
                 miro[i][j] = Integer.parseInt(st.nextToken());
             }
         }
-        // 참가자 입력 1번 참가자부터 시작임.
-        alive = new int[M + 1];
-        peoples = new HashMap<>();
-        for(int i = 1; i <= M; i++){
+        // 사람 입력
+        for(int i = 1; i <= m; i++){
             st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken()) - 1; int y = Integer.parseInt(st.nextToken()) - 1;
-            alive[i] = 1;
-            peoples.put(i, new Person(x, y));
+            int x = Integer.parseInt(st.nextToken())-1; int y = Integer.parseInt(st.nextToken())-1;
+            personList[i] = new Person(x, y);
         }
-        // 출구 입력받기
+        // 출구 입력
         st = new StringTokenizer(br.readLine());
-        gx = Integer.parseInt(st.nextToken()) - 1; gy = Integer.parseInt(st.nextToken()) - 1; 
-        // K번 반복하기
-        for(int t = 0; t < K; t++){
-            // 움직임
-            move();
-            // 회전
+        ex = Integer.parseInt(st.nextToken())-1; ey = Integer.parseInt(st.nextToken())-1;
+
+        for(int turn = 0; turn < k; turn++){
+            // K초 전에 모든 참가자가 탈출에 성공한다면, 게임이 끝납니다.
+            if(!check()) break;
+            // 모든 참가자가 이동합니다.
+            moveAll();
+            if(!check()) break;
+            // 미로 회전하기
             rotate();
-            // StringBuilder sb = new StringBuilder();
-            // for(int i = 0; i < N; i++){
-            //     for(int j = 0; j < N; j++){
-            //         sb.append(miro[i][j]).append(" ");
-            //     }
-            //     sb.append('\n');
-            // }
-            // System.out.println(sb.toString());
-            // sb = new StringBuilder();
-            // sb.append("Person").append('\n');
-            // for(int i = 1; i <= M; i++){
-            //     if(alive[i] == 1){
-            //         Person person = peoples.get(i);
-            //         sb.append(person.x).append(" ").append(person.y).append('\n');
-            //     }
-            // }
-            // sb.append("gx, gy: ").append(gx).append(" ").append(gy).append('\n');
-            // sb.append("result: ").append(result).append('\n');
-            // System.out.println(sb.toString());
+            if(!check()) break;
+            // 현재 탈출구에 있는 사람을 alive 처리해줍니다.
+            runExit();
         }
-        sb.append(result).append('\n');
-        sb.append(gx+1).append(" ").append(gy+1);
-        System.out.print(sb.toString());
+        int totalScore  = 0;
+        for(int i = 1; i <= m; i++){
+            totalScore += distance[i];
+        }
+        System.out.println(totalScore);
+        System.out.print((ex+1) + " " + (ey+1));
+    }
+
+    static void runExit(){
+        for(int number = 1; number <= m; number++){
+            if(alive[number] == 1) continue;
+            if(personList[number].x == ex && personList[number].y == ey) alive[number] = 1;
+        }
     }
 
     static void rotate(){
-        // 회전 범위 찾기
-        // 10 x 10 크기니까 
-        int rx = 0; int ry = 0; int size = 0;
-        int[][] participant = new int[N][N];
-        for(int i = 1; i <= M; i++){
-            if(alive[i] == 1){
-                Person person = peoples.get(i);
-                participant[person.x][person.y] = i;
+        // 한명 이상의 참가자와 출구를 포함하는 가장 작은 정사각형 찾기
+        // 이게 두개 이상이면 r 좌표가 작은게 우선, 그래도 같으면 c 좌표 작은게 우선이다.
+        int[] find = findSquare();
+        int size = find[0];
+        int sx = find[1], sy = find[2];
+        // 선택이 끝나고 회전 시키고 벽 내구도 깎기.
+        // 미로 회전하기.
+        int[][] temp = new int[n][n];
+        for(int i = sx; i < size + sx; i++){
+            for(int j = sy; j < size+sy; j++){
+                int ox = i - sx; int oy = j - sy;
+                int rx = oy; int ry = size - ox - 1;
+                if(miro[i][j] > 0) miro[i][j]--;
+                temp[rx+sx][ry+sy] = miro[i][j];
             }
         }
-        participant[gx][gy] = 11;
-        boolean check = false;
-        for(int i = 2; i <= N; i++){
-            for(int x = 0; x < N - i + 1; x++){
-                for(int y = 0; y < N - i + 1; y++){
-                    // 이 x, y 좌표로부터 i 크기의 사각형에 gx, gy가 있고 사람이 있으면 통과
-                    // 출구가 포함되어 있나?
-                    if(gx >= x && gx < x + i && gy >= y && gy < y + i){
-                        for(int p = 1; p <= M; p++){
-                            if(alive[p] == 1){
-                                Person person = peoples.get(p);
-                                if(person.x >= x && person.x < x + i && person.y >= y && person.y < y + i){
-                                    check = true;
-                                    rx = x; ry = y; size = i;
-                                    break;
-                                }
-                            }
-                        }
-                        if(check) break;
+
+        for(int i = sx; i < size+sx; i++){
+            for(int j = sy; j < size+sy; j++){
+                miro[i][j] = temp[i][j];
+            }
+        }
+
+        // 탈출구 회전하기
+        for(int i = sx; i < size + sx; i++){
+            boolean checkExit = false;
+            for(int j = sy; j < size+sy; j++){
+                if(i == ex && j == ey){
+                    int ox = i - sx; int oy = j - sy;
+                    int rx = oy; int ry = size - ox - 1;
+                    ex = rx+sx; ey = ry+sy;
+                    checkExit = true;
+                    break;
+                }
+            }
+            if(checkExit) break;
+        }
+        // 사람 회전하기
+        for(int number = 1; number <= m; number++){
+            if(alive[number] == 1) continue;
+            for(int i = sx; i < size + sx; i++){
+                boolean checkPerson = false;
+                for(int j = sy; j < size+sy; j++){
+                    if(i == personList[number].x && personList[number].y == j){
+                        int ox = i - sx; int oy = j - sy;
+                        int rx = oy; int ry = size - ox - 1;
+                        personList[number].x = rx + sx; personList[number].y = ry + sy;
+                        checkPerson = true;
+                        break;
                     }
                 }
-                if(check) break;
-            }
-            if(check) break;
-        }
-        // System.out.printf("rx: %d, ry: %d, size: %d\n", rx, ry, size);
-        // 회전 하기 rx, ry, size 기준으로 회전
-        // 회전 할때 0,0 기준으로 생각해서 i == j 부분을 둔 점이 문제였음.
-        for(int i = 0; i < size; i++){
-            for(int j = 0; j < size; j++){
-                if(i == j) break;
-                // 미로
-                int temp = miro[i+rx][j+ry];
-                miro[i+rx][j+ry] = miro[j+rx][i+ry];
-                miro[j+rx][i+ry] = temp;
-                // 참가자
-                temp = participant[i+rx][j+ry];
-                participant[i+rx][j+ry] = participant[j+rx][i+ry];
-                participant[j+rx][i+ry] = temp;
-            }
-        }
-
-        for(int i = rx; i < rx + size; i++){
-            int temp = miro[i][ry];
-            miro[i][ry] = miro[i][ry+size-1];
-            miro[i][ry+size-1] = temp;
-
-            temp = participant[i][ry];
-            participant[i][ry] = participant[i][ry+size-1];
-            participant[i][ry+size-1] = temp;
-        }
-        // 벽 내구도 감소, 참가자 갱신 및 출구 갱신
-        for(int i = rx; i < rx+size; i++){
-            for(int j = ry; j < ry+size; j++){
-                if(miro[i][j] > 0) miro[i][j]--;
-                
-                if(participant[i][j] == 11){
-                    gx = i; gy = j;
-                }else if(participant[i][j] > 0){
-                    Person person = peoples.get(participant[i][j]);
-                    person.x = i; person.y = j;
-                    peoples.put(participant[i][j], person);
-                }
+                if(checkPerson) break;
             }
         }
     }
 
-    static void move(){
-        // 모든 참가자 동시에 이동하기
-        for(int i = 1; i <= M; i++){
-            if(alive[i] == 1){
-                // 움직인다.
-                Person person = peoples.get(i);
-                int currentDistance = distance(person.x, person.y);
-                for(int dir = 0; dir < 4; dir++){
-                    int nx = person.x + dx[dir];
-                    int ny = person.y + dy[dir];
-                    if(isRange(nx, ny) && miro[nx][ny] == 0){
-                        int newDistance = distance(nx, ny);
-                        if(currentDistance > newDistance){
-                            // 움직임 가능하다 움직이기, 상하좌우 순서니까 그냥 넣으면됨.
-                            if(gx == nx && gy == ny){
-                                alive[i] = 0;
-                            }
-                            person.x = nx; person.y = ny;
-                            peoples.put(i, person);
-                            result++;
+    static int[] findSquare(){
+        int curSize = n;
+        int rx = 0;
+        int ry = 0;
+        boolean person = false;
+        boolean exit = false;
+        for(int size = 2; size < n; size++){
+            for(int i = 0; i <= n-size; i++){
+                for(int j = 0; j <= n-size; j++){
+                    // 출구가 해당 범위 내에 있는지
+                    if(i <= ex && ex < i+size && j <= ey && ey < j+size) exit = true;
+                    // 사람이 한명이라도 해당 범위에 있다면 종료.
+                    for(int number = 1; number <= m; number++){
+                        if(alive[number] == 1) continue;
+                        if(personList[number].x >= i && personList[number].x < i + size &&
+                                personList[number].y >= j && personList[number].y < j+size){
+                            person = true;
                             break;
                         }
                     }
+                    // true 라는 것은 이 범위가 정사각형으로 선택되었음을 알림.
+                    if(exit && person){
+                        if(curSize > size){
+                            curSize = size; rx = i; ry = j;
+                        } else if(curSize == size){
+                            if(rx > i){
+                                rx = i; ry = j;
+                            }else if(rx == i){
+                                if(ry > j) ry = j;
+                            }
+                        }
+                    }
+                    exit = false;
+                    person = false;
+                }
+            }
+        }
+        return new int[]{curSize, rx, ry};
+    }
+
+    static void moveAll(){
+        // 모든 참가자를 확인합니다.
+        for(int i = 1; i <= m; i++){
+            // 이때 alive해야합니다.
+            if(alive[i] != 1){
+                // 현재 위치 보다 최단거리가 가까운 방향을 찾는다.
+                int curDistance = shortest(personList[i].x, personList[i].y, ex, ey);
+                int dir = -1;
+                for(int q = 0; q < 4; q++){
+                    int nx = personList[i].x + dx[q];
+                    int ny = personList[i].y + dy[q];
+                    // inRange에서 false를 받으면 이동 가능함.
+                    if(!inRange(nx, ny)){
+                        // 여기서 빈칸인지 확인하고 이동.
+                        if(miro[nx][ny] == 0){
+                            // 이제 거리 계산하고 현재 머물러 있던 칸보다 가까우면 방향 넣기.
+                            int nextDistance = shortest(nx, ny, ex, ey);
+                            if(curDistance > nextDistance){
+                                curDistance = nextDistance;
+                                dir = q;
+                            }
+                        }
+                    }
+                }
+
+                // 참가자가 움직일 수 있다면 움직인 거리 추가하고 좌표 수정하기.
+                if(dir != -1){
+                    int nx = personList[i].x + dx[dir]; int ny = personList[i].y + dy[dir];
+                    personList[i].x = nx; personList[i].y = ny;
+                    if(nx == ex && ny == ey) {
+                        alive[i] = 1;
+                    }
+                    distance[i]++;
                 }
             }
         }
     }
 
-    static boolean isRange(int x, int y){
-        return !(x < 0 || x >= N || y < 0 || y >= N);
+    static boolean inRange(int nx, int ny){
+        return nx < 0 || nx >= n || ny < 0 || ny >= n;
     }
 
-    static int distance(int x,  int y){
-        return Math.abs(x - gx) + Math.abs(y - gy);
+    // 살아있는 사람 없으면 멈춤.
+    static boolean check(){
+        boolean ch = false;
+        for(int i = 1; i <= m; i++){
+            if(alive[i] == 0) ch = true;
+        }
+        return ch;
+    }
+
+    // 최단거리 계산 리턴
+    static int shortest(int x1, int y1, int x2, int y2){
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
 }
