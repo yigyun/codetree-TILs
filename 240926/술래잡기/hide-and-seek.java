@@ -102,7 +102,6 @@ public class Main {
 
         int startIndex = route.size() - 1;
         for(int i = startIndex; i >= 0; i--){
-            if(route.size() > 100) break;
             route.add((route.get(i) + 2)%4);
         }
 
@@ -128,16 +127,15 @@ public class Main {
             int ny = chaser[1] + (dy[chaser[2]] * i);
             if(isRange(nx, ny) && trees[nx][ny] != 1){
                 if(list[nx][ny].size() != 0){
-                    result += (turn * list[nx][ny].size());
                     for(int number : list[nx][ny]){
                         // 해당 번호의 애를 live에서 죽이고, 리스트에서 지우기.
                         live[number] = true;
+                        result += turn;
                     }
                     list[nx][ny].clear();
                 }
             }
         }
-        return;
     }
 
     // 로직 3, 술래가 움직인다.
