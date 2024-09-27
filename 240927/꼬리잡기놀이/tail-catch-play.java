@@ -76,17 +76,23 @@ public class Main {
         for(int t = 0; t < k; t++){
             // 팀 이동
             moveTeam();
-            // for(Team team : teams){
-            //     System.out.printf("head x: %d, head y: %d, tail x: %d, tail y: %d\n", team.head[0], team.head[1], team.tail[0], team.tail[1]);
-            // }
-            int teamNumber = throwBall(t);
-            change(teamNumber);
             // for(int i = 0; i < n; i++){
             //     for(int j = 0; j < n; j++){
             //         System.out.printf("%d ", map[i][j]);
             //     }
             //     System.out.println(" ");
             // }
+            // System.out.println("----------");
+            int teamNumber = throwBall(t);
+            if(teamNumber != -1)
+                change(teamNumber);
+            // for(int i = 0; i < n; i++){
+            //     for(int j = 0; j < n; j++){
+            //         System.out.printf("%d ", map[i][j]);
+            //     }
+            //     System.out.println(" ");
+            // }
+            // System.out.println("----------");
         }
         System.out.print(score);
     }
@@ -104,7 +110,7 @@ public class Main {
     static int throwBall(int turn){
         int dir = (turn % (n * 4)) / n;
         int num = (turn % (n * 4)) % n;
-        int teamNumber = 0;
+        int teamNumber = -1;
         if(dir == 0){
             // 오른쪽으로 볼 시작점 0, 0
             for(int y = 0; y < n; y++){
@@ -116,7 +122,7 @@ public class Main {
             }
         } else if(dir == 1){
             // 위쪽임 시작점 N-1, 0
-            for(int x = 0; x < n; x++){
+            for(int x = n-1; x >= 0; x--){
                 if(map[x][num] != 0 && map[x][num] != 4){
                     teamNumber = teamNum[x][num];
                     plusScore(x, num, teamNumber);
@@ -135,7 +141,7 @@ public class Main {
             }
         } else if(dir == 3){
             num = (n-1) - num;
-            for(int x = n-1; x >= 0; x--){
+            for(int x = 0; x < n; x++){
                 if(map[x][num] != 0 && map[x][num] != 4){
                     teamNumber = teamNum[x][num];
                     plusScore(x, num, teamNumber);
@@ -153,7 +159,7 @@ public class Main {
             score += 1;
         } else if(team.tail[0] == x && team.tail[1] == y){
             score += Math.pow(team.middle.size() + 2, 2);
-        } else{
+        } else {
             for(int i = 0; i < team.middle.size(); i++){
                 int[] temp = team.middle.get(i);
                 if(temp[0] == x && temp[1] == y){
