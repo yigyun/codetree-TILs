@@ -60,8 +60,7 @@ public class Main {
             st = new StringTokenizer(br.readLine());
             int gx = Integer.parseInt(st.nextToken()) - 1;
             int gy = Integer.parseInt(st.nextToken()) - 1;
-            int[] temp = findBasecamp(gx, gy);
-            peoples[i] = new People(temp[0], temp[1], gx, gy);
+            peoples[i] = new People(0, 0, gx, gy);
         }
 
         // 이제 맵에서 2 또는 1이 베이스캠프임.
@@ -79,7 +78,10 @@ public class Main {
             //3번까지 진행하고 !의 불가능 칸 적용하기 + 베이스 캠프 못움직이게 적용하기.
             baseCamp(k);
             check = next();
+            findBasecamp(k);
+            check = next();
             k++;
+
         }
 
         System.out.print(k);
@@ -123,7 +125,6 @@ public class Main {
             if(!arrive[i]){
                 visited = new boolean[n][n];
                 Queue<int[]> que = new LinkedList<>();
-                visited[peoples[i].x][peoples[i].y] = true;
                 for(int dir = 0; dir < 4; dir++){
                     int nx = peoples[i].x + dx[dir];
                     int ny = peoples[i].y + dy[dir];
@@ -153,9 +154,11 @@ public class Main {
         }
     }
 
-    static int[] findBasecamp(int gx, int gy){
-        int[] result = new int[]{-1, -1};
-        
+    static void findBasecamp(int number){
+        if(number >= m) return;
+        int gx = peoples[number].gx;
+        int gy = peoples[number].gy;
+
         Queue<int[]> que = new LinkedList<>();
         visited = new boolean[n][n];
         visited[gx][gy] = true;
@@ -164,20 +167,20 @@ public class Main {
         while(!que.isEmpty()){
             int[] current = que.poll();
             if(map[current[0]][current[1]] == 1){
-                map[current[0]][current[1]] = 2;
-                return current;
+                map[current[0]][current[1]] = -1;
+                peoples[number].x = current[0];
+                peoples[number].y = current[1];
+                break;
             }
             for(int dir = 0; dir < 4; dir++){
                 int nx = current[0] + dx[dir];
                 int ny = current[1] + dy[dir];
-                if(isRange(nx, ny) && !visited[nx][ny]){
+                if(isRange(nx, ny) && !visited[nx][ny] && map[nx][ny] != -1){
                     visited[nx][ny] = true;
                     que.offer(new int[]{nx, ny});
                 }
             }
         }
-
-        return result;
     }
 
     static boolean isRange(int nx, int ny){
