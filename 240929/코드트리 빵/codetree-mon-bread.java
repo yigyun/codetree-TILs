@@ -76,12 +76,9 @@ public class Main {
             //3. t번 사람은 자신이 가고 싶은 편의점과 가장 가까이 있는 베이스 캠프에 들어간다.
             //자신이 가고 싶은 편의점과 가장 가까이 있는 베이스 캠프에 들어간다. 겹치면 행이 작은, 열이 작은 순서로
             //3번까지 진행하고 !의 불가능 칸 적용하기 + 베이스 캠프 못움직이게 적용하기.
-            baseCamp(k);
-            check = next();
             findBasecamp(k);
             check = next();
             k++;
-
         }
 
         System.out.print(k);
@@ -93,11 +90,6 @@ public class Main {
         }
 
         return false;
-    }
-
-    static void baseCamp(int k){
-        if(k >= m) return;
-        map[peoples[k].x][peoples[k].y] = -1;
     }
 
     static void findArrive(int k){
