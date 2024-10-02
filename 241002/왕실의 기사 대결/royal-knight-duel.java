@@ -109,7 +109,7 @@ public class Main {
             Knight currentKnight = knightList.get(current);
             int nx = currentKnight.x + dx[dir];
             int ny = currentKnight.y + dy[dir];
-            if(isRange(nx, ny) && isWall(nx, ny, currentKnight.h, currentKnight.w)){
+            if(isRange(nx, ny, currentKnight.h, currentKnight.w) && isWall(nx, ny, currentKnight.h, currentKnight.w)){
                 for(int i = 0; i < knightList.size(); i++){
                     if(set.contains(i) || alive[i]) continue;
                     Knight checkKnight = knightList.get(i);
@@ -158,7 +158,8 @@ public class Main {
             ny + knight1.w - 1 < knight2.y);
     }
 
-    static boolean isRange(int nx, int ny){
-        return !(nx < 0 || nx >= L || ny < 0 || ny >= L);
+    static boolean isRange(int nx, int ny, int h, int w){
+        return !(nx < 0 || nx >= L || ny < 0 || ny >= L
+                || nx + h - 1 >= L || ny + w - 1 >= L);
     }
 }
