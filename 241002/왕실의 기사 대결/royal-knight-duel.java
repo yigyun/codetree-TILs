@@ -41,7 +41,7 @@ public class Main {
             this.w = w; this.k = k;
         }
     }
-    static List<Knight> knightList;
+    static Knight[] knightList;
     static boolean[] alive;
     static int[] damages;
 
@@ -64,7 +64,7 @@ public class Main {
             }
         }
 
-        knightList = new ArrayList<>();
+        knightList = new Knight[N];
         alive = new boolean[N];
         damages = new int[N];
         for(int i = 0; i < N; i++){
@@ -74,7 +74,7 @@ public class Main {
             int h = Integer.parseInt(st.nextToken());
             int w = Integer.parseInt(st.nextToken());
             int k = Integer.parseInt(st.nextToken());
-            knightList.add(new Knight(x, y, h, w, k));
+            knightList[i] = (new Knight(x, y, h, w, k));
         }
 
 
@@ -82,7 +82,9 @@ public class Main {
             st = new StringTokenizer(br.readLine());
             int knighNum = Integer.parseInt(st.nextToken()) - 1;
             int dir = Integer.parseInt(st.nextToken());
-            bfs(knighNum, dir);
+            if(!alive[knighNum]){
+                bfs(knighNum, dir);
+            }
         }
         printDamage();
     }
@@ -106,60 +108,72 @@ public class Main {
 
         while(!que.isEmpty()){
             int current = que.poll();
-            Knight currentKnight = knightList.get(current);
+            Knight currentKnight = knightList[current];
             int nx = currentKnight.x + dx[dir];
             int ny = currentKnight.y + dy[dir];
-            if(isRange(nx, ny, currentKnight.h, currentKnight.w) && isWall(nx, ny, currentKnight.h, currentKnight.w)){
-                for(int i = 0; i < knightList.size(); i++){
-                    if(set.contains(i) || alive[i]) continue;
-                    Knight checkKnight = knightList.get(i);
-                    if(isPush(nx, ny, currentKnight, checkKnight)){
-                        que.offer(i);
-                        set.add(i);
-                    }
+
+
+            if(!canMove(nx, ny, currentKnight.h, currentKnight.w)){
+                check = true;
+                break;
+            }
+            for(int i = 0; i < N; i++){
+                if(set.contains(i) || alive[i]) continue;
+                Knight checkKnight = knightList[i];
+
+                if(isColliding(nx, ny, currentKnight, checkKnight)){
+                    que.offer(i);
+                    set.add(i);
                 }
-            } else { check = true; break;}
+            }
         }
         if(check) return;
 
-        for(int num : set){
-            Knight kn = knightList.get(num);
-            // 처음 기사를 제외한 애들은 자기 범위에 함정이 있으면 체력을 줄여야 함.
-            int damage = 0;
-            int nx = kn.x + dx[dir]; int ny = kn.y + dy[dir];
-            kn.x = nx; kn.y = ny;
-            if(num == start) continue;
-            for(int i = nx; i < nx + kn.h; i++){
-                for(int j = ny; j < ny + kn.w; j++){
-                    if(map[i][j] == 1) damage++;
-                }
-            }
+        for (int idx : set) {
+            Knight kn = knightList[idx];
+            kn.x += dx[dir];
+            kn.y += dy[dir];
+        }
+
+
+        for(int idx : set){
+            if (idx == start) continue;
+
+            Knight kn = knightList[idx];
+            int damage = calculateDamage(kn);
+
             kn.k -= damage;
-            damages[num] += damage;
+            damages[idx] += damage;
+
             if(kn.k <= 0){ 
-                alive[num] = true;
+                alive[idx] = true;
             }
         }
     }
 
-    static boolean isWall(int x, int y, int h, int w){
-        for(int i = x; i <= (x + h - 1); i++){
-            for(int j = y; j <= (y + w - 1); j++){
-                if(map[i][j] == 2) return false;
+    static boolean canMove(int x, int y, int h, int w) {
+        for (int i = x; i < x + h; i++) {
+            for (int j = y; j < y + w; j++) {
+                if (i < 0 || i >= L || j < 0 || j >= L || map[i][j] == 2) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
-    static boolean isPush(int nx, int ny, Knight knight1 , Knight knight2){
-        return !(nx > knight2.x + knight2.h - 1 || 
-            nx + knight1.h - 1 < knight2.x || 
-            ny > knight2.y + knight2.w - 1 || 
-            ny + knight1.w - 1 < knight2.y);
+    static boolean isColliding(int x, int y, Knight k1, Knight k2) {
+        return !(x + k1.h - 1 < k2.x || k2.x + k2.h - 1 < x ||
+                 y + k1.w - 1 < k2.y || k2.y + k2.w - 1 < y);
     }
 
-    static boolean isRange(int nx, int ny, int h, int w){
-        return !(nx < 0 || nx >= L || ny < 0 || ny >= L
-                || nx + h - 1 >= L || ny + w - 1 >= L);
+    static int calculateDamage(Knight kn) {
+        int damage = 0;
+        for (int i = kn.x; i < kn.x + kn.h; i++) {
+            for (int j = kn.y; j < kn.y + kn.w; j++) {
+                if (map[i][j] == 1) damage++;
+            }
+        }
+        return damage;
     }
 }
