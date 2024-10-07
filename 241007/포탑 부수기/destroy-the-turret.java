@@ -114,6 +114,7 @@ public class Main {
 
         for(int t = 1; t <= K; t++){
             attack(t);
+            
             int live = potabM();
             if(live <= 1) break;
         }
@@ -158,7 +159,6 @@ public class Main {
         for(int dir = 0; dir < 8; dir++){
             int nx = atd.x + pdx[dir];
             int ny = atd.y + pdy[dir];
-            if(nx == atc.x && ny == atc.y) continue;
             if(isRange(nx, ny)){
                 if(map[nx][ny] > 0){
                     Potab potab = potabs[nx][ny].get(0);
@@ -208,6 +208,7 @@ public class Main {
                             }
                         }
                 }
+                if(nx == atc.x && ny == atc.y) continue;
 
                 if(map[nx][ny] > 0){
                     Potab potab = potabs[nx][ny].get(0);
@@ -225,12 +226,14 @@ public class Main {
     static List<int[]> laser(Potab atc, Potab atd){
         // System.out.printf("x: %d, y: %d, power: %d\n", atc.x, atc.y, atc.power);
         // System.out.printf("x: %d, y: %d, power: %d\n", atd.x, atd.y, atd.power);
-        PriorityQueue<int[]> que = new PriorityQueue<>((o1, o2) -> {
-            if(o1[3] == o2[3]){
-                return o1[2] - o2[2];
-            }
-            return o1[3] - o2[3];
-        });
+        // PriorityQueue<int[]> que = new PriorityQueue<>((o1, o2) -> {
+        //     if(o1[3] == o2[3]){
+        //         return o1[2] - o2[2];
+        //     }
+        //     return o1[3] - o2[3];
+        // });
+
+        Queue<int[]> que = new LinkedList<>();
 
         int[][] visited = new int[N][M];
         visited[atc.x][atc.y] = 9;
@@ -388,20 +391,17 @@ public class Main {
 
     static void print(){
         // StringBuilder sb1 = new StringBuilder();
-        // StringBuilder sb2 = new StringBuilder();
         int live = 0;
         for(int i = 0; i < N; i++){
             for(int j = 0; j < M; j++){
                 // sb1.append(map[i][j]).append(" ");
                 if(map[i][j] != 0){
-                    // sb2.append(potabs[i][j].get(0).power).append(" ");
                     live = Math.max(live, map[i][j]);
                 }
             }
             // sb1.append('\n');
         }
         // System.out.println(sb1.toString());
-        // System.out.println(sb2.toString());
-        System.out.print(live);
+        System.out.println(live);
     }
 }
