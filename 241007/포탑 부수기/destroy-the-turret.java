@@ -158,6 +158,7 @@ public class Main {
         for(int dir = 0; dir < 8; dir++){
             int nx = atd.x + pdx[dir];
             int ny = atd.y + pdy[dir];
+            if(nx == atc.x && ny == atc.y) continue;
             if(isRange(nx, ny)){
                 if(map[nx][ny] > 0){
                     Potab potab = potabs[nx][ny].get(0);
@@ -225,11 +226,16 @@ public class Main {
         // System.out.printf("x: %d, y: %d, power: %d\n", atc.x, atc.y, atc.power);
         // System.out.printf("x: %d, y: %d, power: %d\n", atd.x, atd.y, atd.power);
         PriorityQueue<int[]> que = new PriorityQueue<>((o1, o2) -> {
-            return o1[2] - o2[2];
+            if(o1[3] == o2[3]){
+                return o1[2] - o2[2];
+            }
+            return o1[3] - o2[3];
         });
 
         int[][] visited = new int[N][M];
         visited[atc.x][atc.y] = 9;
+
+        int depth = 0;
 
         for(int dir = 0; dir < 4; dir++){
             int nx = atc.x + ldx[dir];
@@ -237,7 +243,7 @@ public class Main {
             if(isRange(nx, ny)){
                 if(visited[nx][ny] == 0 && map[nx][ny] > 0){
                     visited[nx][ny] = dir + 2;
-                    que.offer(new int[]{nx, ny, dir});
+                    que.offer(new int[]{nx, ny, dir, depth});
                 }
             }else{
                 if(dir == 0) ny = 0;
@@ -246,7 +252,7 @@ public class Main {
                 else if(dir == 3) nx = N - 1;
                 if(visited[nx][ny] == 0 && map[nx][ny] > 0){
                     visited[nx][ny] = dir + 2;
-                    que.offer(new int[]{nx, ny, dir});
+                    que.offer(new int[]{nx, ny, dir, depth});
                 }
             }
         }
@@ -255,34 +261,32 @@ public class Main {
 
         boolean check = false;
 
-        while(!que.isEmpty()){
+        while(!que.isEmpty() && !check){
             int size = que.size();
+            depth++;
             for(int i = 0; i < size; i++){
                 int[] current = que.poll();
                 int x = current[0]; int y = current[1];
-                if(x == atd.x && y == atd.y){ check = true; break;}
+                if(x == atd.x && y == atd.y){
+                     check = true; 
+                     break;
+                }
 
                 for(int dir = 0; dir < 4; dir++){
                     int nx = x + ldx[dir];
                     int ny = y + ldy[dir];
-                    if(isRange(nx, ny)){
-                        if(visited[nx][ny] == 0 && map[nx][ny] > 0){
-                            visited[nx][ny] = dir + 2;
-                            que.offer(new int[]{nx, ny, dir});
-                        }
-                    }else{
+                    if(!isRange(nx, ny)){
                         if(dir == 0) ny = 0;
                         else if(dir == 1) nx = 0;
                         else if(dir == 2) ny = M - 1;
                         else if(dir == 3) nx = N - 1;
-                        if(visited[nx][ny] == 0 && map[nx][ny] > 0){
-                            visited[nx][ny] = dir + 2;
-                            que.offer(new int[]{nx, ny, dir});
-                        }
+                    }
+                    if(visited[nx][ny] == 0 && map[nx][ny] > 0){
+                        visited[nx][ny] = dir + 2;
+                        que.offer(new int[]{nx, ny, dir, depth});
                     }
                 }
             }
-            if(check) break;          
         }
 
         List<int[]> list = new ArrayList<>();
