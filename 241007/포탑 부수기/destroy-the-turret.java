@@ -137,9 +137,8 @@ public class Main {
                         if(!potab.isAttack){
                             map[i][j] += 1;
                             potab.power += 1;
-                        }else{
-                            potab.isAttack = false;
                         }
+                        potab.isAttack = false;
                     }
                 }
             }
@@ -158,63 +157,20 @@ public class Main {
         for(int dir = 0; dir < 8; dir++){
             int nx = atd.x + pdx[dir];
             int ny = atd.y + pdy[dir];
-            if(isRange(nx, ny)){
-                if(map[nx][ny] > 0){
-                    Potab potab = potabs[nx][ny].get(0);
-                    potab.power -= (atc.power / 2);
-                    map[nx][ny] = potab.power;
-                    potab.isAttack = true;
-                }
-            }else{
-                // 꼭짓점이면 특별하게 처리하기.
-                    if(dir == 0) ny = 0;
-                    else if(dir == 1) nx = 0;
-                    else if(dir == 2) ny = M - 1;
-                    else if(dir == 3) nx = N - 1;
-                    else if(dir == 4) {
-                        if(nx < 0 || nx >= N) nx = N - 1;
-                        if(ny < 0 || ny >= M) ny = M - 1;
-                    }else if(dir == 5){
-                        if(nx < 0 || nx >= N) nx = N -1;
-                        if(ny < 0 || ny >= M) ny = 0;
-                    }else if(dir == 6){
-                        if(nx < 0 || nx >= N) nx = 0;
-                        if(ny < 0 || ny >= M) ny = M - 1;
-                    }else if(dir == 7){
-                        if(nx < 0 || nx >= N) nx = 0;
-                        if(ny < 0 || ny >= M) ny = 0;
-                    }
-
-                    if(atd.x == 0){
-                        if(atd.y == 0){
-                            if(dir == 4){
-                                nx = N -1; ny = M - 1;
-                            }
-                        }else if(atd.y == M - 1){
-                            if(dir == 5){
-                                nx = N - 1; ny = 0;
-                            }
+            if(!isRange(nx, ny)){
+                if(nx < 0) nx = N -1;
+                else if(nx >= N) nx = 0;
+                if(ny < 0) ny = M - 1;
+                else if(ny >= M) ny = 0;
+            }
+            if (nx != atc.x || ny != atc.y) {
+                        // 유효한 위치에 피해 적용
+                        if (map[nx][ny] > 0) {
+                            Potab potab = potabs[nx][ny].get(0);
+                            potab.power -= (atc.power / 2); // 절반 피해
+                            map[nx][ny] = potab.power; // 지도에 반영
+                            potab.isAttack = true;
                         }
-                    }else if(atd.x == N - 1){
-                        if(atd.y == 0){
-                            if(dir == 6){
-                                nx = 0; ny = M - 1;
-                            }
-                            
-                        }else if(atd.y == M - 1){
-                            if(dir == 7){
-                                nx = 0; ny = 0;
-                            }
-                        }
-                }
-                if(nx == atc.x && ny == atc.y) continue;
-
-                if(map[nx][ny] > 0){
-                    Potab potab = potabs[nx][ny].get(0);
-                    potab.power -= (atc.power / 2);
-                    map[nx][ny] = potab.power;
-                    potab.isAttack = true;
-                }
             }
         }
     }
@@ -377,7 +333,7 @@ public class Main {
 
         Potab atc = que1.poll();
         Potab atd = que2.poll();
-        if(atd.x == atc.x && atd.y == atc.y){
+        while(atd.x == atc.x && atd.y == atc.y && !que2.isEmpty()){
             atd = que2.poll();
         }
         
