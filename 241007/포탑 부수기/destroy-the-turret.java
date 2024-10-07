@@ -114,7 +114,6 @@ public class Main {
 
         for(int t = 1; t <= K; t++){
             attack(t);
-            
             int live = potabM();
             if(live <= 1) break;
         }
@@ -378,6 +377,9 @@ public class Main {
 
         Potab atc = que1.poll();
         Potab atd = que2.poll();
+        if(atd.x == atc.x && atd.y == atc.y){
+            atd = que2.poll();
+        }
         
         // 공격자
         atc.last = t; atc.isAttack = true; atc.power += N + M; map[atc.x][atc.y] = atc.power;
