@@ -209,28 +209,28 @@ public class Main {
                 if(isRange(nx, ny)){
                     List<Integer> newList = new ArrayList<>(current.from);
                     newList.add(dir);
-                    Node nextNode = new Node(nx, ny, current.depth + 1, newList);
-                    que.offer(nextNode);
+                    que.offer(new Node(nx, ny, current.depth + 1, newList));
                 }
             }
         }
 
         Node node = list.get(0); int maxCount = 0;
 
-        for(int i = 0; i < list.size(); i++){
+        for(Node current : list){
             boolean[][] visited = new boolean[4][4];
-            Node current = list.get(i);
             int count = 0;
             int x = r; int y = c;
+            boolean pathCheck = false;
 
             for(int dir : current.from){
                 int nx = x + pdx[dir];
                 int ny = y + pdy[dir];
-                if(visited[nx][ny]) break;
+                if(visited[nx][ny]){pathCheck = true; break;}
                 visited[nx][ny] = true;
                 count += monster[nx][ny].size();
                 x = nx; y = ny;
             }
+            if(pathCheck) continue;
 
             if(maxCount < count){
                 node = current;
@@ -239,8 +239,12 @@ public class Main {
                 for(int q = 0; q < 3; q++){
                     int dir1 = node.from.get(q);
                     int dir2 = current.from.get(q);
-                    if(dir1 == dir2) continue;
-                    if(dir1 > dir2){ node = current; break;}
+                    if(dir1 != dir2){
+                        if(dir1 > dir2){
+                            node = current;
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -248,9 +252,9 @@ public class Main {
         for(int dir : node.from){
             r = r + pdx[dir];
             c = c + pdy[dir];
-            if(monster[r][c].size() != 0){
+            if(monster[r][c].size() > 0){
                 deads[r][c] = turn;
-                monster[r][c] = new ArrayList<>();
+                monster[r][c].clear();
             }
         }
     }
