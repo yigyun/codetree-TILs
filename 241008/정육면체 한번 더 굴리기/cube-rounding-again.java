@@ -35,7 +35,7 @@ public class Main {
 
     // 맨위, 위의 상, 위의 하, 오른쪽, 왼쪽, 맨아래
     static int[] dice = new int[]{1, 5, 3, 4, 2, 6};
-    static int x; static int y;
+    static int x; static int y; static int dir;
 
     //상, 좌, 하, 우
     static int[] dx = new int[]{-1, 0, 1, 0};
@@ -70,11 +70,11 @@ public class Main {
             }
         }
 
-        int dir = 1;
+        dir = 1;
 
         for(int i = 1; i <= m; i++){
-            move(dir);
-            dir = sum(dir);
+            move();
+            sum();
         }
         
         System.out.print(result);
@@ -103,9 +103,9 @@ public class Main {
 
         while(!que.isEmpty()){
             int[] current = que.poll();
-            for(int dir = 0; dir < 4; dir++){
-                int nx = current[0] + dx[dir];
-                int ny = current[1] + dy[dir];
+            for(int di = 0; di < 4; di++){
+                int nx = current[0] + dx[di];
+                int ny = current[1] + dy[di];
                 if(isRange(nx, ny) && !visited[nx][ny] && map[nx][ny] == number){
                     que.offer(new int[]{nx, ny});
                     list.add(new int[]{nx, ny});
@@ -122,7 +122,7 @@ public class Main {
         }
     }
 
-    static int sum(int dir){
+    static void sum(){
         int number = dice[5];
         // 현재 위치 x, y에서 point 가져오면 끝.
         result += point[x][y];
@@ -134,12 +134,10 @@ public class Main {
         }else if(map[x][y] < dice[5]){
             dir = (dir + 1) % 4;
         }
-
-        return dir;
     }
 
     // 주사위가 움직인다. 초기는 오른쪽으로 움직인다.
-    static void move(int dir){
+    static void move(){
 
         int nx = x + dx[dir];
         int ny = y + dy[dir];
@@ -151,22 +149,22 @@ public class Main {
         }
 
         int[] newDice = dice.clone();
-        if(dir == 0){
+        if(dir == 0){// 상
             newDice[1] = dice[0];
             newDice[5] = dice[1];
             newDice[4] = dice[5];
             newDice[0] = dice[4];
-        }else if(dir == 2){
+        }else if(dir == 2){ //우
             newDice[4] = dice[0];
             newDice[5] = dice[4];
             newDice[1] = dice[5];
             newDice[0] = dice[1];
-        }else if(dir == 3){
+        }else if(dir == 3){// 하
             newDice[3] = dice[0];
             newDice[0] = dice[2];
             newDice[5] = dice[3];
             newDice[2] = dice[5];
-        }else if(dir == 1){
+        }else if(dir == 1){// 좌
             newDice[2] = dice[0];
             newDice[5] = dice[2];
             newDice[0] = dice[3];
