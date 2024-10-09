@@ -98,17 +98,20 @@ public class Main {
                 for(int dir = 0; dir < 4; dir++){
                     int nx = node[0] + dx[dir];
                     int ny = node[1] + dy[dir];
-                    if(isRange(nx, ny) && !visited[nx][ny] && (map[nx][ny] < 4 && map[nx][ny] > 1)){
-                        if(map[nx][ny] == 2){
-                            middle.add(new People(nx, ny));
-                        }else if(map[nx][ny] == 3){
+                    if(isRange(nx, ny) && !visited[nx][ny]){
+                        if(map[nx][ny] == 3){
                             tail = new People(nx, ny);
+                            route.add(new int[]{nx, ny});
+                            visited[nx][ny] = true;
+                            teamNumberMap[nx][ny] = teamNum;
+                        }else if(map[nx][ny] == 2){
+                            middle.add(new People(nx, ny));
+                            visited[nx][ny] = true;
+                            que.offer(new int[]{nx, ny});
+                            route.add(new int[]{nx, ny});
+                            teamNumberMap[nx][ny] = teamNum;
+                            break;
                         }
-                        visited[nx][ny] = true;
-                        que.offer(new int[]{nx, ny});
-                        route.add(new int[]{nx, ny});
-                        teamNumberMap[nx][ny] = teamNum;
-                        break;
                     }
                 }
             }
@@ -131,6 +134,7 @@ public class Main {
             teams.add(new Team(head, tail, middle, route));
             teamNum++;
         }
+
 
         for(int t = 0; t < k; t++){
             move();
@@ -196,6 +200,8 @@ public class Main {
             People temp = team.head;
             team.head = team.tail;
             team.tail = temp;
+            map[team.head.x][team.head.y] = 1;
+            map[team.tail.x][team.tail.y] = 3;
             Collections.reverse(team.middle);
         }
     }
@@ -215,7 +221,7 @@ public class Main {
                 for(int dir = 0; dir < 4; dir++){
                     int nx = team.head.x + dx[dir];
                     int ny = team.head.y + dy[dir];
-                    if(isRange(nx, ny) && map[nx][ny] != 2 && map[nx][ny] != 0){
+                    if(isRange(nx, ny) && (map[nx][ny] == 3 || map[nx][ny] == 4)){
                         team.head.x = nx;
                         team.head.y = ny;
                         break;
@@ -228,7 +234,7 @@ public class Main {
                 for(int dir = 0; dir < 4; dir++){
                     int nx = team.head.x + dx[dir];
                     int ny = team.head.y + dy[dir];
-                    if(isRange(nx, ny) && map[nx][ny] != 3 && map[nx][ny] != 0){
+                    if (isRange(nx, ny) && (map[nx][ny] == 4 || (nx == team.tail.x && ny == team.tail.y))) {
                         team.head.x = nx;
                         team.head.y = ny;
                         break;
@@ -263,7 +269,7 @@ public class Main {
             }
             sb.append('\n');
         }
-        System.out.print(sb.toString());
+        System.out.println(sb.toString());
     }
 
     static boolean isRange(int nx, int ny){
