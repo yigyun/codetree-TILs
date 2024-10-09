@@ -108,6 +108,7 @@ public class Main {
                         que.offer(new int[]{nx, ny});
                         route.add(new int[]{nx, ny});
                         teamNumberMap[nx][ny] = teamNum;
+                        break;
                     }
                 }
             }
@@ -115,6 +116,7 @@ public class Main {
             teams.add(new Team(head, tail, middle, route));
             teamNum++;
         }
+
 
         for(int t = 0; t < k; t++){
             move();
@@ -144,10 +146,11 @@ public class Main {
             x = 0;
             y = (n - 1) - position;
         }
+
         if(map[x][y] >= 1 && map[x][y] < 4){
             findCheck = false;
         }else{
-            for(int i = 0; i < n - 1; i++){
+            for(int i = 0; i < n; i++){
                 int nx = x + dx[dir];
                 int ny = y + dy[dir];
                 if(isRange(nx, ny)){
@@ -176,10 +179,13 @@ public class Main {
                 }
             }
 
+
             // 방향 바꾸기
             People temp = team.head;
             team.head = team.tail;
-            team.tail = temp;
+            team.tail = new People(temp.x, temp.y);
+            map[team.head.x][team.head.y] = 1;
+            map[team.tail.x][team.tail.y] = 3;
             Collections.reverse(team.middle);
         }
     }
@@ -191,6 +197,7 @@ public class Main {
             // head는 미들이 있으면 미들 반대편, 미들이 없으면 4가 있는 쪽으로 이동하기.
             
             if(team.middle.size() != 0){
+
                 team.tail = team.middle.get(team.middle.size() - 1);
                 
                 team.middle.remove(team.middle.size() - 1);
@@ -206,15 +213,13 @@ public class Main {
                     }
                 }
             }else{
-                team.tail.x = team.head.x;
-                team.tail.y = team.head.y;
+                team.tail = new People(team.head.x, team.head.y);
 
                 for(int dir = 0; dir < 4; dir++){
                     int nx = team.head.x + dx[dir];
                     int ny = team.head.y + dy[dir];
                     if(isRange(nx, ny) && map[nx][ny] != 3 && map[nx][ny] != 0){
-                        team.head.x = nx;
-                        team.head.y = ny;
+                        team.head = new People(nx, ny);
                         break;
                     }
                 }
