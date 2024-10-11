@@ -120,7 +120,6 @@ public class Main {
             if(dir == sprit.dir) exit[nx][ny] = 1;
         }
         
-
         // 정령이 이동한다.
         // 정령이 자신이랑 같은 수의 위치를 큐에 담는다.
         // 만약 0이 아닌 다른 숫자를 만나면 현재 위치가 exit인지 따지고
@@ -171,12 +170,23 @@ public class Main {
 
     static void print(){
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < k; i++){
-        sb.append(i).append(" - ").append("x: ").append(sprits.get(i).x)
-        .append(" y: ").append(sprits.get(i).y).append('\n');
+        StringBuilder sb2 = new StringBuilder();
+        // for(int i = 0; i < k; i++){
+        // sb.append(i).append(" - ").append("x: ").append(sprits.get(i).x)
+        // .append(" y: ").append(sprits.get(i).y).append('\n');
+        // }
+
+        for(int i = 0; i < r; i++){
+            for(int j = 0; j < c; j++){
+                sb.append(map[i][j]).append(" ");
+                sb2.append(exit[i][j]).append(" ");
+            }
+            sb.append('\n');
+            sb2.append('\n');
         }
 
         System.out.println(sb.toString());
+        System.out.println(sb2.toString());
     }
 
     // * 골렘의 이동
@@ -211,8 +221,13 @@ public class Main {
         // 방향 회전하고 값 바꿔줘야함.
         sprit.dir = (sprit.dir + 1) % 4;
         sprit.y += 1;
+        if(!south(sprit)){
+            sprit.dir = sprit.dir - 1 < 0 ? 3 : sprit.dir - 1;
+            sprit.y -= 1;
+            return false;
+        }
 
-        return south(sprit); 
+        return true; 
     }
 
     static boolean west(Sprit sprit){
@@ -231,7 +246,13 @@ public class Main {
         // 방향 회전하고 값 바꿔줘야함.
         sprit.dir = sprit.dir - 1 < 0 ? 3 : sprit.dir - 1;
         sprit.y -= 1;
-        return south(sprit);
+
+        if(!south(sprit)){
+            sprit.dir = (sprit.dir + 1) % 4;
+            sprit.y += 1;
+            return false;
+        }
+        return true;
     }
 
     static boolean south(Sprit sprit){
