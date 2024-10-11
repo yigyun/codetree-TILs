@@ -84,7 +84,6 @@ public class Main {
             move();
             store();
             baseCamp();
-            // print();
             t++;
         }
 
@@ -120,23 +119,39 @@ public class Main {
         visited[people.gx][people.gy] = true;
         que.offer(new int[]{people.gx, people.gy});
 
+        int fx = Integer.MAX_VALUE;
+        int fy = Integer.MAX_VALUE;
+
         while(!que.isEmpty()){
-            int[] current = que.poll();
-            if(map[current[0]][current[1]] == 1){
-                people.x = current[0];
-                people.y = current[1];
-                map[people.x][people.y] = -1;
-                break;
-            }
-            for(int dir = 0; dir < 4; dir++){
-                int nx = current[0] + dx[dir];
-                int ny = current[1] + dy[dir];
-                if(isRange(nx, ny) && !visited[nx][ny] && map[nx][ny] != -1){
-                    que.offer(new int[]{nx, ny});
-                    visited[nx][ny] = true;
+            int size = que.size();
+            boolean check = true;
+            for(int i = 0; i < size; i++){
+                int[] current = que.poll();
+                if(map[current[0]][current[1]] == 1){
+                    if(fx == current[0]){
+                        fy = fy > current[1] ? current[1] : fy;
+                    }else if(fx > current[0]){
+                        fx = current[0];
+                        fy = current[1];
+                    }
+                    check = false;
+                    continue;
+                }
+                for(int dir = 0; dir < 4; dir++){
+                    int nx = current[0] + dx[dir];
+                    int ny = current[1] + dy[dir];
+                    if(isRange(nx, ny) && !visited[nx][ny] && map[nx][ny] != -1){
+                        que.offer(new int[]{nx, ny});
+                        visited[nx][ny] = true;
+                    }
                 }
             }
+            if(!check) break;
         }
+
+        people.x = fx;
+        people.y = fy;
+        map[people.x][people.y] = -1;
     }
 
     //  2. 편의점에 도착
