@@ -122,7 +122,7 @@ public class Main {
                 for(int j = 0; j <= n - size; j++){
                     if(findSquare(i, j, size)){
                         findCheck = true;
-                        fx = j; fy = i;
+                        fx = i; fy = j;
                         fsize = size;
                         break;
                     }
@@ -182,8 +182,8 @@ public class Main {
         boolean flag1 = false;
         boolean flag2 = false;
         
-        for(int i = y; i < y + size; i++){
-            for(int j = x; j < x + size; j++){
+        for(int i = x; i < x + size; i++){
+            for(int j = y; j < y + size; j++){
                 if(gx == i && gy == j){
                     flag1 = true;
                 }
